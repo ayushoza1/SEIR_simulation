@@ -12,22 +12,25 @@ seir <-function(n=5500000,ne=10,nt=100) {
   S <-E <-I <-R <-rep(0,nt) ## set up storage for pop in each state
   S[1] <-n-ne ##Initialize
   E[1] <-ne ## initialize
+  new_infections <- rep(0, nt-1)
+  
   for (i in 2:nt) { ## loop over days
     
     sum_infectious = sum(beta[x == 2])
     prob_exposed =  sum_infectious * lamda * beta
     
     u <-runif(n) ## uniform random deviates 
-    x[x== 2 & u < (1/5)] <- 3 ## I -> R with prob 1/5
-    x[x==1 & u < (1/3)] <- 2 ## E -> I with prob 1/3
-    x[x==0 & u < prob_exposed] <- 1  ## S -> E with prob
+    x[x == 2 & u < (1/5)] <- 3 ## I -> R with prob 1/5
+    x[x ==1 & u < (1/3)] <- 2 ## E -> I with prob 1/3
+    new_infections[i-1] <- sum(x == 2) ##New people in infectious state for day i
+    x[x ==0 & u < prob_exposed] <- 1  ## S -> E with prob
     
     S[i] <- sum(x == 0)
     E[i] <- sum(x == 1)
     I[i] <- sum(x == 2)
     R[i] <- sum(x == 3)
   }
-  list(S=S,E=E,I=I,R=R)
+  list(S=S,E=E,I=I,R=R, new_infections=new_infections)
 } ## seir
   
 seir()
