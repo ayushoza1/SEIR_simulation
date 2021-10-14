@@ -43,8 +43,29 @@ seir <-function(n=5500000,ne=10,nt=150) {
   }
   list(S=S,E=E,I=I,R=R, new_infections=new_infections, new_infections_percentile=new_infections_percentile, new_infections_sample=new_infections_sample)
 } ## seir
-  
-seir()
+
+
+exec <- seir()
+
+x <- exec$new_infections
+y <- exec$new_infections_percentile
+z <- exec$new_infections_sample
+
+trfx = (x - mean(x))/(max(x) - min(x))
+trfy = (y - mean(y))/(max(y) - min(y))
+trfz = (z - mean(z))/(max(z) - min(z))
+
+plot(trfx, type = 'l', col = 'brown')
+points(trfy, type = 'l', col = 'red')
+lines(trfy, col = 'chocolate1')
+points(trfz, type = 'l', col = 'cadetblue1')
+lines(trfz, col = 'cadetblue')
+
+legend(1, 0.5, legend=c("Line 1", "Line 2", "Line 3"),
+       col=c("brown", "chocolate1", "cadetblue"), lty=1:2, cex=0.8)
+
+
+
 
 
 
