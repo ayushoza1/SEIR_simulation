@@ -47,6 +47,32 @@ seir <-function(n=5500000,ne=10,nt=150) {
 
 exec <- seir()
 
+#Ayush
+
+xx <- exec$new_infections
+yy <- exec$new_infections_percentile
+zz <- exec$new_infections_sample
+
+trfxx = xx*100/5500000
+trfyy = yy*100/550000
+trfzz = zz*100/5500
+day <- c(1:149)
+
+maxtrfxx <- which.max(trfxx)
+maxtrfyy <- which.max(trfyy)
+maxtrfzz <- which.max(trfzz)
+
+plot(day, trfxx, pch=19,cex=.5, main="New Infection Trajectories" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)", type = 'l', col = 'brown')
+lines(trfyy, col = 'green')
+lines(trfzz, col = 'cadetblue')
+legend(1, 2, legend=c("Whole population", "Cautious 10% of the popultion", "Random sample of 5,500"),
+       col=c("brown", "green", "cadetblue"), lty=1:1, cex=0.5)
+abline(v = c(maxtrfxx, maxtrfyy, maxtrfzz) , lty=c(2, 2, 2), lwd=c(0.4, 0.4, 0.4), col=c("grey", "grey"))
+mtext(maxtrfxx, side = 1, at = maxtrfxx, cex = 0.7) ; mtext(maxtrfyy, side = 1, at = maxtrfyy, cex = 0.7) ; mtext(maxtrfzz, side = 1, at = maxtrfzz, cex = 0.7) 
+
+
+#Gowtham
+
 x <- exec$new_infections
 y <- exec$new_infections_percentile
 z <- exec$new_infections_sample
