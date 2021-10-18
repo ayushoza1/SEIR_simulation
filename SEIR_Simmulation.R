@@ -7,7 +7,9 @@
 ## random sample of 0.1% of the population. Defining 4 states, susceptible, exposed, infected and recovered or dead on each day 
 ## an individual moves from suseptible state to the exposed state a function of their contact rate, the infected populations 
 ##contact rate and a viral infectivity parameter lamda. Each day an individual can move from being exposed to infected with 
-## the disease with probability 1/3 and move from infected to recovered or dead with probability 1/5
+## the disease with probability 1/3 and move from infected to recovered or dead with probability 1/5. Using the SEIR function, 
+## alongside an initial run this program aims to plot the variability in these cohorts by running the model 10 separate times
+## and plotting the variability on three seperate graphs. 
 
 ## SEIR model details
 ## ******************
@@ -22,7 +24,7 @@
 ## 6. Three count vectors are set up, new_infections, new_infectios_percentile, new_infections_sample and the number of people 
 ##    moving from E -> I in each group is recorded for that dat
 ## 7. Model runs for 150 days
-## 8. Plots are created using plot, lines, mtext, ablines and legend functions
+## 8. Plots are created using plot, lines, mtext, ablines and legend functions to plot the trajectory of all three samples
 
 seir <-function(n=5500000,ne=10,nt=150) {
   ## SEIR stochastic simulation model.
@@ -36,89 +38,126 @@ seir <-function(n=5500000,ne=10,nt=150) {
   x <-rep(0,n) ## initialize to susceptible state
   beta <-rlnorm(n,0,0.5); beta <-beta/mean(beta) ## individual infection rates
   x[1:ne] <- 1 ## create some exposed
-  S <-E <-I <-R <-rep(0,nt) ## set up storage for pop in each state
-  S[1] <-n-ne ##Initialize state S
-  E[1] <-ne ## initialize state E
   
-  new_infections <- rep(0, nt-1) ## initialize new daily infections count
-  new_infections_percentile <- rep(0, nt-1) ## initialize new daily infections count for bottom 10%
-  new_infections_sample <- rep(0, nt-1) ## initialize new daily infections count for sample
+  new_infections <- new_infections_percentile <- new_infections_sample <- rep(0, nt-1) ## initialize new daily infections count
+   ## initialize new daily infections count for bottom 10%
+   ## initialize new daily infections count for sample
   
-  bottomquantile <-quantile(beta, 0.1) ##Beta values in lowest 10%
+  bottomquantile <- quantile(beta, 0.1) ##Beta values in lowest 10%
+  low_beta <- beta < bottomquantile
   samplepopn <- rep(0, n) ; samplepopn[sample(1:n, n*0.001)] <- 1 #Indicator vector identifying 0.1% of popn
   
   for (i in 2:nt) { ## loop over days
     
-    sum_infectious = sum(beta[x == 2]) 
-    prob_exposed =  sum_infectious * lamda * beta 
-    
+    prob_exposed =  sum(beta[x == 2]) * lamda * beta 
     u <-runif(n) ## uniform random deviates 
+    xu = (x == 1 & u < (1/3))
     
-    new_infections[i-1] <- sum(x == 1 & u < (1/3)) ##New people in infectious state for day i
-    new_infections_percentile[i-1] <- sum(x == 1 & u < (1/3) & beta < bottomquantile) ##Bottom 10% new people in infectious state for day i
-    new_infections_sample[i-1] <- sum(x == 1 & u < (1/3) & samplepopn == 1) ##Sampled new people in infectious state for day i
+    new_infections[i-1] <- sum(xu) ##New people in infectious state for day i
+    new_infections_percentile[i-1] <- sum(xu & low_beta) ##Bottom 10% new people in infectious state for day i
+    new_infections_sample[i-1] <- sum(xu & samplepopn == 1) ##Sampled new people in infectious state for day i
     
     x[x == 2 & u < (1/5)] <- 3 ## I -> R with prob 1/5
-    x[x ==1 & u < (1/3)] <- 2 ## E -> I with prob 1/3
-    
+    x[xu] <- 2 ## E -> I with prob 1/3
     x[x ==0 & u < prob_exposed] <- 1  ## S -> E with prob
     
-    S[i] <- sum(x == 0)
-    E[i] <- sum(x == 1)
-    I[i] <- sum(x == 2)
-    R[i] <- sum(x == 3)
   }
-  list(S=S,E=E,I=I,R=R, new_infections=new_infections, new_infections_percentile=new_infections_percentile, new_infections_sample=new_infections_sample)
+
 } ## seir
 
+## Plot graphs for initial model run 
 
 exec <- seir()
 
-#Ayush
-
-xx <- exec$new_infections
-yy <- exec$new_infections_percentile
-zz <- exec$new_infections_sample
-
-trfxx = xx*100/5500000
-trfyy = yy*100/550000
-trfzz = zz*100/5500
+xx <- exec$new_infections*100/5500000
+yy <- exec$new_infections_percentile*100/550000
+zz <- exec$new_infections_sample*100/5500
 day <- c(1:149)
 
-maxtrfxx <- which.max(trfxx)
-maxtrfyy <- which.max(trfyy)
-maxtrfzz <- which.max(trfzz)
+maxxx <- which.max(xx)
+maxyy <- which.max(yy)
+maxzz <- which.max(zz)
 
-plot(day, trfxx, pch=19,cex=.5, main="New Infection Trajectories" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)", type = 'l', col = 'brown')
-lines(trfyy, col = 'green')
-lines(trfzz, col = 'cadetblue')
+plot(day, xx, pch=19,cex=.5, main="New Infection Trajectories" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)", type = 'l', col = 'brown', ylim = c(0,3))
+lines(yy, col = 'green')
+lines(zz, col = 'cadetblue')
 legend(1, 2, legend=c("Whole population", "Cautious 10% of the popultion", "Random sample of 5,500"),
        col=c("brown", "green", "cadetblue"), lty=1:1, cex=0.5)
-abline(v = c(maxtrfxx, maxtrfyy, maxtrfzz) , lty=c(2, 2, 2), lwd=c(0.4, 0.4, 0.4), col=c("grey", "grey"))
-mtext(maxtrfxx, side = 1, at = maxtrfxx, cex = 0.7) ; mtext(maxtrfyy, side = 1, at = maxtrfyy, cex = 0.7) ; mtext(maxtrfzz, side = 1, at = maxtrfzz, cex = 0.7) 
+abline(v = c(maxxx, maxyy, maxzz) , lty=c(2, 2, 2), lwd=c(0.4, 0.4, 0.4), col=c("grey", "grey"))
+mtext(maxxx, side = 1, at = maxxx, cex = 0.7) ; mtext(maxyy, side = 1, at = maxyy, cex = 0.7) ; mtext(maxzz, side = 1, at = maxzz, cex = 0.7) 
 
-#Gowtham
+##Plot graphs for 10 sample runs
 
-x <- exec$new_infections
-y <- exec$new_infections_percentile
-z <- exec$new_infections_sample
+day <- c(1:149)
 
-trfx = (x - mean(x))/(max(x) - min(x))
-trfy = (y - mean(y))/(max(y) - min(y))
-trfz = (z - mean(z))/(max(z) - min(z))
+exec1 <- seir()
+xx1 <- exec1$new_infections*100/5500000
+yy1 <- exec1$new_infections_percentile*100/550000
+zz1 <- exec1$new_infections_sample*100/5500
 
-plot(trfx, type = 'l', col = 'brown')
-points(trfy, type = 'l', col = 'red')
-lines(trfy, col = 'chocolate1')
-points(trfz, type = 'l', col = 'cadetblue1')
-lines(trfz, col = 'cadetblue')
+exec2 <- seir()
+xx2 <- exec2$new_infections*100/5500000
+yy2 <- exec2$new_infections_percentile*100/550000
+zz2 <- exec2$new_infections_sample*100/5500
 
-legend(1, 0.5, legend=c("Line 1", "Line 2", "Line 3"),
-       col=c("brown", "chocolate1", "cadetblue"), lty=1:2, cex=0.8)
+exec3 <- seir()
+xx3 <- exec3$new_infections*100/5500000
+yy3 <- exec3$new_infections_percentile*100/550000
+zz3 <- exec3$new_infections_sample*100/5500
 
+exec4 <- seir()
+xx4 <- exec4$new_infections*100/5500000
+yy4 <- exec4$new_infections_percentile*100/550000
+zz4 <- exec4$new_infections_sample*100/5500
 
+exec5 <- seir()
+xx5 <- exec5$new_infections*100/5500000
+yy5 <- exec5$new_infections_percentile*100/550000
+zz5 <- exec5$new_infections_sample*100/5500
 
+exec6 <- seir()
+xx6 <- exec6$new_infections*100/5500000
+yy6 <- exec6$new_infections_percentile*100/550000
+zz6 <- exec6$new_infections_sample*100/5500
 
+exec7 <- seir()
+xx7 <- exec7$new_infections*100/5500000
+yy7 <- exec7$new_infections_percentile*100/550000
+zz7 <- exec7$new_infections_sample*100/5500
 
+exec8 <- seir()
+xx8 <- exec8$new_infections*100/5500000
+yy8 <- exec8$new_infections_percentile*100/550000
+zz8 <- exec8$new_infections_sample*100/5500
+
+exec9 <- seir()
+xx9 <- exec9$new_infections*100/5500000
+yy9 <- exec9$new_infections_percentile*100/550000
+zz9 <- exec9$new_infections_sample*100/5500
+
+exec10 <- seir()
+xx10 <- exec10$new_infections*100/5500000
+yy10 <- exec10$new_infections_percentile*100/550000
+zz10 <- exec10$new_infections_sample*100/5500
+
+a <- pmax(xx1, xx2, xx3, xx4, xx5, xx6, xx7, xx8, xx9, xx10)
+b <- pmax(yy1, yy2, yy3, yy4, yy5, yy6, yy7, yy8, yy9, yy10)
+c <- pmax(zz1, zz2, zz3, zz4, zz5, zz6, zz7, zz8, zz9, zz10)
+
+d <- pmin(xx1, xx2, xx3, xx4, xx5, xx6, xx7, xx8, xx9, xx10)
+e <- pmin(yy1, yy2, yy3, yy4, yy5, yy6, yy7, yy8, yy9, yy10)
+f <- pmin(zz1, zz2, zz3, zz4, zz5, zz6, zz7, zz8, zz9, zz10)
+
+plot(day, a, type = "l", ylim = c(0,3), col="grey", pch=19,cex=.5, main="Variability of infection in the whole population" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)")
+lines(day, d, type = "l", col="grey")
+polygon(c(day, rev(day)), c(a, rev(d)), col = "grey")
+
+plot(day, b, type = "l", ylim = c(0,3), col="grey", pch=19,cex=.5, main="Variability of infection in cautious 10% of the population" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)")
+lines(day, e, type = "l", col="grey")
+polygon(c(day, rev(day)), c(b, rev(e)), col = "grey")
+
+plot(day, c, type = "l", ylim = c(0,3), col="grey", pch=19,cex=.5, main="Variability of infection in a random sample of 0.1% of population" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)")
+lines(day, f, type = "l", col="grey")
+polygon(c(day, rev(day)), c(c, rev(f)), col = "grey")
 
 
