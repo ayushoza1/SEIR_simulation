@@ -62,7 +62,7 @@ seir <-function(n=5500000,ne=10,nt=150) {
     x[x == 0 & u < prob_exp] <- 1  ## S -> E with prob
     
   }
-  list(new_infections=new_infections, new_infections_percentile=new_infections_percentile, new_infections_sample=new_infections_sample)
+  return(list(new_infections=new_infections, new_infections_percentile=new_infections_percentile, new_infections_sample=new_infections_sample))
 } ## seir
 
 ## Plot graphs for initial model run 
@@ -88,74 +88,33 @@ mtext(maxxx, side = 1, at = maxxx, cex = 0.7) ; mtext(maxyy, side = 1, at = maxy
 
 ##Plot graphs for 10 sample runs
 
+l1 <- list()
+l2 <- list()
+l3 <- list()
+
+for (i in 1:10) {
+  run <- seir()
+  l1[i] <- list(run$new_infections*100/5500000)
+  l2[i] <- list(run$new_infections_percentile*100/550000)
+  l3[i] <- list(run$new_infections_sample*100/5500)
+}
+
+a <- pmax(unlist(l1[1]), unlist(l1[2]), unlist(l1[3]), unlist(l1[4]), unlist(l1[5]), unlist(l1[6]), unlist(l1[7]), unlist(l1[8]), unlist(l1[9]), unlist(l1[10]))
+b <- pmax(unlist(l2[1]), unlist(l2[2]), unlist(l2[3]), unlist(l2[4]), unlist(l2[5]), unlist(l2[6]), unlist(l2[7]), unlist(l2[8]), unlist(l2[9]), unlist(l2[10]))
+c <-  pmax(unlist(l3[1]), unlist(l3[2]), unlist(l3[3]), unlist(l3[4]), unlist(l3[5]), unlist(l3[6]), unlist(l3[7]), unlist(l3[8]), unlist(l3[9]), unlist(l3[10]))
+
+d <- pmin(unlist(l1[1]), unlist(l1[2]), unlist(l1[3]), unlist(l1[4]), unlist(l1[5]), unlist(l1[6]), unlist(l1[7]), unlist(l1[8]), unlist(l1[9]), unlist(l1[10]))
+e <- pmin(unlist(l2[1]), unlist(l2[2]), unlist(l2[3]), unlist(l2[4]), unlist(l2[5]), unlist(l2[6]), unlist(l2[7]), unlist(l2[8]), unlist(l2[9]), unlist(l2[10]))
+f <-  pmin(unlist(l3[1]), unlist(l3[2]), unlist(l3[3]), unlist(l3[4]), unlist(l3[5]), unlist(l3[6]), unlist(l3[7]), unlist(l3[8]), unlist(l3[9]), unlist(l3[10]))
+
 day <- c(1:149)
-
-exec1 <- seir()
-xx1 <- exec1$new_infections*100/5500000
-yy1 <- exec1$new_infections_percentile*100/550000
-zz1 <- exec1$new_infections_sample*100/5500
-
-exec2 <- seir()
-xx2 <- exec2$new_infections*100/5500000
-yy2 <- exec2$new_infections_percentile*100/550000
-zz2 <- exec2$new_infections_sample*100/5500
-
-exec3 <- seir()
-xx3 <- exec3$new_infections*100/5500000
-yy3 <- exec3$new_infections_percentile*100/550000
-zz3 <- exec3$new_infections_sample*100/5500
-
-exec4 <- seir()
-xx4 <- exec4$new_infections*100/5500000
-yy4 <- exec4$new_infections_percentile*100/550000
-zz4 <- exec4$new_infections_sample*100/5500
-
-exec5 <- seir()
-xx5 <- exec5$new_infections*100/5500000
-yy5 <- exec5$new_infections_percentile*100/550000
-zz5 <- exec5$new_infections_sample*100/5500
-
-exec6 <- seir()
-xx6 <- exec6$new_infections*100/5500000
-yy6 <- exec6$new_infections_percentile*100/550000
-zz6 <- exec6$new_infections_sample*100/5500
-
-exec7 <- seir()
-xx7 <- exec7$new_infections*100/5500000
-yy7 <- exec7$new_infections_percentile*100/550000
-zz7 <- exec7$new_infections_sample*100/5500
-
-exec8 <- seir()
-xx8 <- exec8$new_infections*100/5500000
-yy8 <- exec8$new_infections_percentile*100/550000
-zz8 <- exec8$new_infections_sample*100/5500
-
-exec9 <- seir()
-xx9 <- exec9$new_infections*100/5500000
-yy9 <- exec9$new_infections_percentile*100/550000
-zz9 <- exec9$new_infections_sample*100/5500
-
-exec10 <- seir()
-xx10 <- exec10$new_infections*100/5500000
-yy10 <- exec10$new_infections_percentile*100/550000
-zz10 <- exec10$new_infections_sample*100/5500
-
-a <- pmax(xx1, xx2, xx3, xx4, xx5, xx6, xx7, xx8, xx9, xx10)
-b <- pmax(yy1, yy2, yy3, yy4, yy5, yy6, yy7, yy8, yy9, yy10)
-c <- pmax(zz1, zz2, zz3, zz4, zz5, zz6, zz7, zz8, zz9, zz10)
-
-d <- pmin(xx1, xx2, xx3, xx4, xx5, xx6, xx7, xx8, xx9, xx10)
-e <- pmin(yy1, yy2, yy3, yy4, yy5, yy6, yy7, yy8, yy9, yy10)
-f <- pmin(zz1, zz2, zz3, zz4, zz5, zz6, zz7, zz8, zz9, zz10)
 
 plot(day, a, type = "l", ylim = c(0,3), col="grey", pch=19,cex=.5, main="Variability of infection in the whole population" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)")
 lines(day, d, type = "l", col="grey")
 polygon(c(day, rev(day)), c(a, rev(d)), col = "grey")
-
 plot(day, b, type = "l", ylim = c(0,3), col="grey", pch=19,cex=.5, main="Variability of infection in cautious 10% of the population" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)")
 lines(day, e, type = "l", col="grey")
 polygon(c(day, rev(day)), c(b, rev(e)), col = "grey")
-
 plot(day, c, type = "l", ylim = c(0,3), col="grey", pch=19,cex=.5, main="Variability of infection in a random sample of 0.1% of population" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)")
 lines(day, f, type = "l", col="grey")
 polygon(c(day, rev(day)), c(c, rev(f)), col = "grey")
