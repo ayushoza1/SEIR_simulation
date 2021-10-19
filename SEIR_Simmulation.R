@@ -91,12 +91,19 @@ mtext(maxxx, side = 1, at = maxxx, cex = 0.7) ; mtext(maxyy, side = 1, at = maxy
 l1 <- list()
 l2 <- list()
 l3 <- list()
+v1 <- rep(0, 10)
+v2 <- rep(0, 10)
+v3 <- rep(0, 10)
 
 for (i in 1:10) {
   run <- seir()
   l1[i] <- list(run$new_infections*100/5500000)
   l2[i] <- list(run$new_infections_percentile*100/550000)
   l3[i] <- list(run$new_infections_sample*100/5500)
+  
+  v1[i] <- which.max(run$new_infections*100/5500000)
+  v2[i] <- which.max(run$new_infections_percentile*100/550000)
+  v3[i] <- which.max(run$new_infections_sample*100/550)
 }
 
 a <- pmax(unlist(l1[1]), unlist(l1[2]), unlist(l1[3]), unlist(l1[4]), unlist(l1[5]), unlist(l1[6]), unlist(l1[7]), unlist(l1[8]), unlist(l1[9]), unlist(l1[10]))
@@ -118,5 +125,7 @@ polygon(c(day, rev(day)), c(b, rev(e)), col = "grey")
 plot(day, c, type = "l", ylim = c(0,3), col="grey", pch=19,cex=.5, main="Variability of infection in a random sample of 0.1% of population" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)")
 lines(day, f, type = "l", col="grey")
 polygon(c(day, rev(day)), c(c, rev(f)), col = "grey")
+
+boxplot(v1, v2, v3, main = "Boxplot & Whistlers for the infection peak of 3 cohorts", horizontal = TRUE, col = c("brown","green", "cadetblue"), names = c("Whole population", "Cautious 10%", "Random sample"), at = c(1, 6, 11))
 
 
