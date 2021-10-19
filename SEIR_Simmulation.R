@@ -34,35 +34,35 @@ seir <-function(n=5500000,ne=10,nt=150) {
   ## 1/5 prob of moving I -> S with the assumption this can happen after 1 day
   ## 0 = Susecptible ## 1 = Exposed ## 2 = Infected ## 3 = Recovered/Dead 
   
-  lamda <- 0.4/n
+  lamda <- 0.4/n  
   x <-rep(0,n) ## initialize to susceptible state
   beta <-rlnorm(n,0,0.5); beta <-beta/mean(beta) ## individual infection rates
   x[1:ne] <- 1 ## create some exposed
   
   new_infections <- new_infections_percentile <- new_infections_sample <- rep(0, nt-1) ## initialize new daily infections count
-   ## initialize new daily infections count for bottom 10%
-   ## initialize new daily infections count for sample
+  ## initialize new daily infections count for bottom 10%
+  ## initialize new daily infections count for sample
   
-  bottomquantile <- quantile(beta, 0.1) ##Beta values in lowest 10%
-  low_beta <- beta < bottomquantile
-  samplepopn <- rep(0, n) ; samplepopn[sample(1:n, n*0.001)] <- 1 #Indicator vector identifying 0.1% of popn
+  bottomquantile <- quantile( beta, 0.1 ) ##Beta values in lowest 10%
+  low_beta = beta < bottomquantile
+  samplepopn <- rep(0, n) ; samplepopn[ sample(1:n, n*0.001) ] <- 1 #Indicator vector identifying 0.1% of popn
   
   for (i in 2:nt) { ## loop over days
     
-    prob_exposed =  sum(beta[x == 2]) * lamda * beta 
+    prob_exp = sum(beta[x == 2]) * lamda * beta
     u <-runif(n) ## uniform random deviates 
-    xu = (x == 1 & u < (1/3))
     
+    xu = (x == 1 & u < (1/3))
     new_infections[i-1] <- sum(xu) ##New people in infectious state for day i
     new_infections_percentile[i-1] <- sum(xu & low_beta) ##Bottom 10% new people in infectious state for day i
     new_infections_sample[i-1] <- sum(xu & samplepopn == 1) ##Sampled new people in infectious state for day i
     
     x[x == 2 & u < (1/5)] <- 3 ## I -> R with prob 1/5
     x[xu] <- 2 ## E -> I with prob 1/3
-    x[x ==0 & u < prob_exposed] <- 1  ## S -> E with prob
+    x[x == 0 & u < prob_exp] <- 1  ## S -> E with prob
     
   }
-
+  list(new_infections=new_infections, new_infections_percentile=new_infections_percentile, new_infections_sample=new_infections_sample)
 } ## seir
 
 ## Plot graphs for initial model run 
