@@ -106,6 +106,9 @@ for (i in 1:10) {
   v3[i] <- which.max(run$new_infections_sample*100/550)
 }
 
+boxplot(v1, v2, v3, main = "Boxplot & Whistlers for the infection peak of 3 cohorts", horizontal = TRUE, col = c("brown","green", "cadetblue"), names = c("Whole population", "Cautious 10%", "Random sample"), at = c(1, 6, 11))
+
+
 a <- pmax(unlist(l1[1]), unlist(l1[2]), unlist(l1[3]), unlist(l1[4]), unlist(l1[5]), unlist(l1[6]), unlist(l1[7]), unlist(l1[8]), unlist(l1[9]), unlist(l1[10]))
 b <- pmax(unlist(l2[1]), unlist(l2[2]), unlist(l2[3]), unlist(l2[4]), unlist(l2[5]), unlist(l2[6]), unlist(l2[7]), unlist(l2[8]), unlist(l2[9]), unlist(l2[10]))
 c <-  pmax(unlist(l3[1]), unlist(l3[2]), unlist(l3[3]), unlist(l3[4]), unlist(l3[5]), unlist(l3[6]), unlist(l3[7]), unlist(l3[8]), unlist(l3[9]), unlist(l3[10]))
@@ -125,7 +128,5 @@ polygon(c(day, rev(day)), c(b, rev(e)), col = "grey")
 plot(day, c, type = "l", ylim = c(0,3), col="grey", pch=19,cex=.5, main="Variability of infection in a random sample of 0.1% of population" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)")
 lines(day, f, type = "l", col="grey")
 polygon(c(day, rev(day)), c(c, rev(f)), col = "grey")
-
-boxplot(v1, v2, v3, main = "Boxplot & Whistlers for the infection peak of 3 cohorts", horizontal = TRUE, col = c("brown","green", "cadetblue"), names = c("Whole population", "Cautious 10%", "Random sample"), at = c(1, 6, 11))
 
 
