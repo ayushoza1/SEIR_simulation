@@ -14,14 +14,14 @@
 ## SEIR model details
 ## ******************
 ## 1. Vectors are initiated whereby 'x' is defined as the storage vector for the whole population each element can either be 
-##    0 = Susecptible ## 1 = Exposed ## 2 = Infected ## 3 = Recovered/Dead 
+##    0 = Susceptible ## 1 = Exposed ## 2 = Infected ## 3 = Recovered/Dead 
 ## 2. Vectors are initiated whereby 'S', 'E', 'I', 'R' are vectors showing how many people are in each state each day
 ## 3. Beta's are assigned to each individual (using rnom) and stored in 'beta' the bottom 10% is identified and stored
-## 4. A random saample of 0.1% is also taken from the population for use later (using sample)
-## 5. Model starts by using uniform random devidates (runif) to move people from state E -> I and E -> R
-## 5. A person, i,  in state S are assigned a probabilty of moving to state E by sum_infectious * lamda * beta(i) and 
+## 4. A random sample of 0.1% is also taken from the population for use later (using sample)
+## 5. Model starts by using uniform random deviates (runif) to move people from state E -> I and E -> R
+## 5. A person, i,  in state S are assigned a probability of moving to state E by sum_infectious * lamda * beta(i) and 
 ##    moved to state S based on random deviates (runif)
-## 6. Three count vectors are set up, new_infections, new_infectios_percentile, new_infections_sample and the number of people 
+## 6. Three count vectors are set up, new_infections, new_infections_percentile, new_infections_sample and the number of people 
 ##    moving from E -> I in each group is recorded for that dat
 ## 7. Model runs for 150 days
 ## 8. Plots are created using plot, lines, mtext, ablines and legend functions to plot the trajectory of all three samples
@@ -30,17 +30,17 @@ seir <-function(n=5500000,ne=10,nt=150) {
   
   ## SEIR stochastic simulation model
   ## n = population size; ne = initially exposed; nt = number of days
-  ## Sum of betas of indivial in infected state * beta of susceptible individual * landa is prob S -> E
+  ## Sum of betas of individual in infected state * beta of susceptible individual * lamda is prob S -> E
   ## 1/3 prob of moving E -> I
   ## 1/5 prob of moving I -> S with the assumption this can happen after 1 day
-  ## 0 = Susecptible ## 1 = Exposed ## 2 = Infected ## 3 = Recovered/Dead 
+  ## 0 = Susceptible ## 1 = Exposed ## 2 = Infected ## 3 = Recovered/Dead 
   
   lamda <- 0.4/n  										## Assuming overall viral infectivity parameter
   x <-rep(0,n) 											## Initializing the vector for persons in susceptible state
   beta <-rlnorm(n,0,0.5); beta <-beta/mean(beta) 		## Assuming probability distribution for transmission rate
   x[1:ne] <- 1 											## Assuming some exposed state persons
   
-  ## Initializing new daily infections, the cautious 10% with lowest trasmission rate values and the 0.1% random sample of the population
+  ## Initializing new daily infections, the cautious 10% with lowest transmission rate values and the 0.1% random sample of the population
   
   new_infections <- new_infections_percentile <- new_infections_sample <- rep(0, nt-1)
   
@@ -76,7 +76,7 @@ seir <-function(n=5500000,ne=10,nt=150) {
 
 exec <- seir()
 
-## Normilizing the scales of infections of various cases onto a common scale
+## Normalizing the scales of infections of various cases onto a common scale
 
 xx <- exec$new_infections*100/5500000
 yy <- exec$new_infections_percentile*100/550000
@@ -97,7 +97,7 @@ lines(zz, col = 'cadetblue')
 
 ## Creating a legend for the plot representing the color of each line and corresponding case of the model
 
-legend(1, 2, legend=c("Whole population", "Cautious 10% of the popultion", "Random sample of 5,500"),
+legend("topleft", inset = 0.05, legend=c("Whole population", "Cautious 10% of the popultion", "Random sample of 5,500"),
        col=c("brown", "green", "cadetblue"), lty=1:1, cex=0.5)
 
 ## Creating a line to highlight the day at which each case peaks in the model
