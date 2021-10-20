@@ -9,7 +9,7 @@
 ## contact rate and a viral infectivity parameter lamda. Each day an individual can move from being exposed to infected with 
 ## the disease with probability 1/3 and move from infected to recovered or dead with probability 1/5. Using the SEIR function, 
 ## alongside an initial run this program aims to plot the variability in these cohorts by running the model 10 separate times
-## and plotting the variability on three separate graphs. 
+## and plotting the variability of the runs. 
 
 ## SEIR model details
 ## ******************
@@ -35,35 +35,39 @@ seir <-function(n=5500000,ne=10,nt=150) {
   ## 1/5 prob of moving I -> S with the assumption this can happen after 1 day
   ## 0 = Susceptible ## 1 = Exposed ## 2 = Infected ## 3 = Recovered/Dead 
   
-  lamda <- 0.4/n  										## Assuming overall viral infectivity parameter
-  x <-rep(0,n) 											## Initializing the vector for persons in susceptible state
-  beta <-rlnorm(n,0,0.5); beta <-beta/mean(beta) 		## Assuming probability distribution for transmission rate
-  x[1:ne] <- 1 											## Assuming some exposed state persons
+  lamda <- 0.4/n ## Assuming overall viral infectivity parameter
+  x <-rep(0,n) ## Initializing the vector for persons in susceptible state
+  beta <-rlnorm(n,0,0.5); beta <-beta/mean(beta) ## Assuming probability distribution for transmission rate
+  x[1:ne] <- 1 ## Assuming some exposed state persons
   
   ## Initializing new daily infections, the cautious 10% with lowest transmission rate values and the 0.1% random sample of the population
   
   new_infections <- new_infections_percentile <- new_infections_sample <- rep(0, nt-1)
   
   
-  bottomquantile <- quantile( beta, 0.1 ) 				## Beta values in lowest 10%
-  low_beta = beta < bottomquantile						## low_beta refers to the 10% cautious persons
+  bottomquantile <- quantile( beta, 0.1 ) ## Beta values in lowest 10%
+  low_beta = beta < bottomquantile ## low_beta refers to the 10% cautious persons
   samplepopn <- rep(0, n) ; samplepopn[ sample(1:n, n*0.001) ] <- 1 ## Indicator vector identifying 0.1% random sample from the population
   
   ## The infection model
   
-  for (i in 2:nt) { 									## Looping over days
+  for (i in 2:nt) { ## Looping over days
     
-    prob_exp = sum(beta[x == 2]) * lamda * beta			## Calculating the probability of getting infected after being exposed 
-    u <-runif(n) 										## Generating a uniform random deviates vector for model
     
-    xu = (x == 1 & u < (1/3))							## Calculating vector xu to store persons after being exposed to infection
-    new_infections[i-1] <- sum(xu) 								##New people in infectious state for day i
-    new_infections_percentile[i-1] <- sum(xu & low_beta) 		##Bottom 10% new people in infectious state for day i
-    new_infections_sample[i-1] <- sum(xu & samplepopn == 1) 	##Sampled new people in infectious state for day i
+    prob_exp = sum(beta[x == 2]) * lamda * beta	## Calculating the probability of getting infected after being exposed 
+    u <-runif(n) ## Generating a uniform random deviates vector for model
     
-    x[x == 2 & u < (1/5)] <- 3 							## Persons changing states from I -> R with prob 1/5
-    x[xu] <- 2 											## Persons changing states from E -> I with prob 1/3 as calculated for xu vector
-    x[x == 0 & u < prob_exp] <- 1  						## Persons changing states from S -> E after probability of being exposed
+    xu <- (x == 0 & u < prob_exp)	## Calculating vector xu to store persons after being exposed to infection
+    x1 <- which(x == 1)
+    x2 <- which(x == 2)
+    
+    new_infections[i-1] <- sum(xu) 	##New people in infectious state for day i
+    new_infections_percentile[i-1] <- sum(xu & low_beta) ##Bottom 10% new people in infectious state for day i
+    new_infections_sample[i-1] <- sum(xu & samplepopn == 1) ##Sampled new people in infectious state for day i
+    
+    x[x2][u[x2] < (1/5)] <- 3 ## Persons changing states from I -> R with prob 1/5
+    x[x1][u[x1] < (1/3)] <- 2 ## Persons changing states from E -> I with prob 1/3 as calculated for xu vector
+    x[xu] <- 1  ## Persons changing states from S -> E after probability of being exposed
     
   }
   
@@ -91,81 +95,93 @@ maxzz <- which.max(zz)
 
 ## Plotting various cases on a common scale after normalization
 
-plot(day, xx, pch=19,cex=.5, main="New Infection Trajectories" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)", type = 'l', col = 'brown', ylim = c(0,3))
+plot(day, xx, pch=19,cex=.5, main="New Infection Trajectories - Initial Run" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)", type = 'l', col = 'brown', ylim = c(0,3.5))
 lines(yy, col = 'green')
 lines(zz, col = 'cadetblue')
 
 ## Creating a legend for the plot representing the color of each line and corresponding case of the model
 
-legend("topleft", inset = 0.05, legend=c("Whole population", "Cautious 10% of the popultion", "Random sample of 5,500"),
-       col=c("brown", "green", "cadetblue"), lty=1:1, cex=0.5)
+legend("topleft", inset = 0.05, legend=c("Whole population", "Cautious 10% of the popultion", "Random sample of 5,500"),col=c("brown", "green", "cadetblue"), lty=1:1, cex=0.5)
 
 ## Creating a line to highlight the day at which each case peaks in the model
 
+points(maxxx, max(xx), pch=16) ; points(maxyy, max(yy), pch=16) ; points(maxzz, max(zz), pch=16)
 abline(v = c(maxxx, maxyy, maxzz) , lty=c(2, 2, 2), lwd=c(0.4, 0.4, 0.4), col=c("grey", "grey"))
-mtext(maxxx, side = 1, at = maxxx, cex = 0.7) ; mtext(maxyy, side = 1, at = maxyy, cex = 0.7) ; mtext(maxzz, side = 1, at = maxzz, cex = 0.7) 
+text(maxxx, max(xx)-0.2, labels = maxxx, cex = 0.7) ; text(maxyy, max(yy)-0.2, labels = maxyy, cex = 0.7) ; text(maxzz, max(zz)-0.2, labels = maxzz, cex = 0.7)
 
-## Plotting graphs replicating 10 model simulations representing variability of the infection in each new infections, 10% cautious people and 0.1% random sample case
+## 10 sample runs - Overview
+## *************************
+## Plotting graphs replicating 10 model simulations to represent the variability of the infections in each of the three cohorts. Trajectory
+## of the pandemic is plotted for each sample run alongside a stripchart and boxplot. The boxplot shows the variabilty in pandemic peak for the 10 runs 
+## , however, it ignores the pairwsie variability or day on day changes in infection peaks. The stripchart shows the day on day variability by 
+## standardizing the infection peak movement from one sample run to the next to 10 days movement and showing the corresponding movement in the other 
+## cohorts peak.
 
-## Creating lists to store model outputs for 10 runs
+v1 <- v2 <- v3 <- rep(0, 10) ##initialize vector to store day of infection peak for each cohort for each sample run
+d1 <- d2 <- d3 <- rep(0,9) ##initialize vector to store the difference in the infection peak between each run
+sd1 <- sd2 <- sd3 <- rep(10,9) ##initialize vector to store the standardized difference in the infection peak between each run coressponding to 10 day movement for whole popn
 
-l1 <- list()
-l2 <- list()
-l3 <- list()
-v1 <- rep(0, 10)
-v2 <- rep(0, 10)
-v3 <- rep(0, 10)
-
-## Looping over to run the model for 10 times with parallel normalization and finding maximum(day at which infection peaks) of each case
+## Looping over to run the model for 10 times with parallel normalization and finding maximum day at which infection peaks of each cohort
 
 for (i in 1:10) {
   run <- seir()
-  l1[i] <- list(run$new_infections*100/5500000)
-  l2[i] <- list(run$new_infections_percentile*100/550000)
-  l3[i] <- list(run$new_infections_sample*100/5500)
+  
+  xx <- run$new_infections*100/5500000
+  yy <- run$new_infections_percentile*100/550000
+  zz <- run$new_infections_sample*100/5500
   
   v1[i] <- which.max(run$new_infections*100/5500000)
   v2[i] <- which.max(run$new_infections_percentile*100/550000)
   v3[i] <- which.max(run$new_infections_sample*100/550)
+
+  ## Plotting each sample run
+  
+  plot(day, xx, pch=19,cex=.5, main=paste("New Infection Trajectories - Run", i)  ,xlab="Day number",ylab="Percentage of cohort newly infected (%)", type = 'l', col = 'brown', ylim = c(0,3.5))
+  lines(yy, col = 'green')
+  lines(zz, col = 'cadetblue')
+  legend("topleft", inset = 0.05, legend=c("Whole population", "Cautious 10% of the popultion", "Random sample of 5,500"),col=c("brown", "green", "cadetblue"), lty=1:1, cex=0.5)
+  points(unlist(v1[i]), max(xx), pch=16) ; points(unlist(v2[i]), max(yy), pch=16) ; points(unlist(v3[i]), max(zz), pch=16)
+  abline(v = c(unlist(v1[i]), unlist(v2[i]), unlist(v3[i])) , lty=c(2, 2, 2), lwd=c(0.4, 0.4, 0.4), col=c("grey", "grey"))
+  text(unlist(v1[i]), max(xx)-0.2, labels = unlist(v1[i]), cex = 0.7) ; text(unlist(v2[i]), max(yy)-0.2, labels = unlist(v2[i]), cex = 0.7) ; text(unlist(v3[i]), max(zz)-0.2, labels = unlist(v3[i]), cex = 0.7)
+  
 }
+
+## Standardizing the movement in each sample runs infection peak for each cohort to corresponding to a 10 day movement in infection peak for the whole population
+
+for (i in 1:9) {
+  
+  ## If the change in infection peak of whole popn between 2 sample runs is 0 assume 1 day change in infection peak
+  
+  if (v1[i+1] == v1[i]) { 
+    d1[i] <- 1
+  } else {
+    d1[i] <- v1[i+1] - v1[i] ## Storage of change in infection peak between two runs
+  }
+  
+  d2[i] <- v2[i+1] - v2[i] ## Storage of change in infection peak for cautious 10% of popn
+  d3[i] <- v3[i+1] - v3[i] ## Storage of change in infection peak for sample 0.1% of popn
+  
+  sd2[i] <- (d2[i]/d1[i])*10 ## Standardize change in infection peak for cautious 10% popn 
+  sd3[i] <- (d3[i]/d1[i])*10 ## Standardize change in infection peak for cautious 10% popn 
+
+  }
+
 
 ## Box plot representing the peak values for 10 runs for each of the 3 cases/cohorts
 
 boxplot(v1, v2, v3, main = "Boxplot & Whistlers for the infection peak of 3 cohorts", horizontal = TRUE, col = c("brown","green", "cadetblue"), names = c("Whole population", "Cautious 10%", "Random sample"), at = c(1, 6, 11))
 
+## Stripchart representing the movement in infection peaks corresponding to a 10 day move in the infection peak of whole popn
 
-## Below lines of code were written to plot and demonstrate the variability of each case when model is simulated 10 times
+datapeak <- list("Whole population"=sd1, "Cautious 10%"=sd2, "Random sample" =sd3) ##list of standardized movements in infection peak for three cohorts
 
-## Finding pairwise maximum of each of the simulations to find the peaks of each case/cohort to shade the variability
+stripchart(datapeak, main="Cohort's Infection peak movement Vs \nStandardized 10 day move in population peak ", xlab="Movement in infection peak", ylab="Cohort",method="jitter",col = c("brown","green", "cadetblue"),pch=16)
 
-a <- pmax(unlist(l1[1]), unlist(l1[2]), unlist(l1[3]), unlist(l1[4]), unlist(l1[5]), unlist(l1[6]), unlist(l1[7]), unlist(l1[8]), unlist(l1[9]), unlist(l1[10]))
-b <- pmax(unlist(l2[1]), unlist(l2[2]), unlist(l2[3]), unlist(l2[4]), unlist(l2[5]), unlist(l2[6]), unlist(l2[7]), unlist(l2[8]), unlist(l2[9]), unlist(l2[10]))
-c <- pmax(unlist(l3[1]), unlist(l3[2]), unlist(l3[3]), unlist(l3[4]), unlist(l3[5]), unlist(l3[6]), unlist(l3[7]), unlist(l3[8]), unlist(l3[9]), unlist(l3[10]))
+## Conclusion
+## The graphs plotted show that infection trajectories simulated using the ZOE data app will have a later peak compared to similation of the whole popluation
+## given they are cautious (later peaks on line graphs). Infection trajectories using the ZOE app are likely to show lower variability from run to run regarding
+## the infection peak compared to the REACT-2 trajectories (given the cluster of points <10 days on the stripchart compared to the random sample). However, the 
+## ZOE app data's infection peak will still show variability of a factor 10/20% compared to a simulated model of the whole population.
 
-## Finding pairwise minimum of each of the simulations to find the lowest of each case/cohort to shade the variability
 
-d <- pmin(unlist(l1[1]), unlist(l1[2]), unlist(l1[3]), unlist(l1[4]), unlist(l1[5]), unlist(l1[6]), unlist(l1[7]), unlist(l1[8]), unlist(l1[9]), unlist(l1[10]))
-e <- pmin(unlist(l2[1]), unlist(l2[2]), unlist(l2[3]), unlist(l2[4]), unlist(l2[5]), unlist(l2[6]), unlist(l2[7]), unlist(l2[8]), unlist(l2[9]), unlist(l2[10]))
-f <- pmin(unlist(l3[1]), unlist(l3[2]), unlist(l3[3]), unlist(l3[4]), unlist(l3[5]), unlist(l3[6]), unlist(l3[7]), unlist(l3[8]), unlist(l3[9]), unlist(l3[10]))
 
-day <- c(1:149)
-
-## Plotting data obtained on simulating the model 10 times and shadowing the variation in each case with 'grey'
-
-## This graph shows variability of infection for the whole population when simulated 10 times
-
-plot(day, a, type = "l", ylim = c(0,3), col="grey", pch=19,cex=.5, main="Variability of infection in the whole population" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)")
-lines(day, d, type = "l", col="grey")
-polygon(c(day, rev(day)), c(a, rev(d)), col = "grey")
-
-## This graph shows variability of infection for the cautious 10% of the population when simulated 10 times
-
-plot(day, b, type = "l", ylim = c(0,3), col="grey", pch=19,cex=.5, main="Variability of infection in cautious 10% of the population" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)")
-lines(day, e, type = "l", col="grey")
-polygon(c(day, rev(day)), c(b, rev(e)), col = "grey")
-
-## This graph shows variability of infection for the 0.1% random sample taken from the population
-
-plot(day, c, type = "l", ylim = c(0,3), col="grey", pch=19,cex=.5, main="Variability of infection in a random sample of 0.1% of population" ,xlab="Day number",ylab="Percentage of cohort newly infected (%)")
-lines(day, f, type = "l", col="grey")
-polygon(c(day, rev(day)), c(c, rev(f)), col = "grey")
