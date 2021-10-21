@@ -89,9 +89,9 @@ day <- c(1:149)
 
 ## Calculating maximum values(number of days) for each infection peak case
 
-maxxx <- which.max(xx)
-maxyy <- which.max(yy)
-maxzz <- which.max(zz)
+maxxx <- which.max(xx) ##infection peak of whole popn
+maxyy <- which.max(yy) ##infection peak of cautious 10%
+maxzz <- which.max(zz) ##infection peak of random sample 0.1%
 
 ## Plotting various cases on a common scale after normalization
 
