@@ -148,9 +148,9 @@ for (i in 1:10) {
   
 }
 
-## Standardizing the movement in each sample runs infection peak for each cohort to corresponding to a 10 day movement in infection peak for the whole population
+## Calculating the change in the infection peak for each cohort from sample run to the next
 
-for (i in 1:9) {
+for (i in 1:9) { ##Loop over each day to the next
   
   ## If the change in infection peak of whole popn between 2 sample runs is 0 assume 1 day change in infection peak
   
@@ -165,8 +165,8 @@ for (i in 1:9) {
   
   }
 
-sd2 <- (d2/d1)*10 ##Standardize change in infection peak for cautious 10% popn 
-sd3 <- (d3/d1)*10 ##Standardize change in infection peak for random 0.1% of popn 
+sd2 <- (d2/d1)*10 ##Standardizing the movement in cautious 10% infection peak  corresponding to a 10 day movement in infection peak for the whole population
+sd3 <- (d3/d1)*10 ##Standardizing the movement in random 0.1% infection peak  corresponding to a 10 day movement in infection peak for the whole population
 
 dd2 <- d2 - d1 #Difference between move in infection people for whole population compared to cautious 10%
 dd3 <- d3 - d1 #Difference between move in infection people for whole population compared to random 0.1%
