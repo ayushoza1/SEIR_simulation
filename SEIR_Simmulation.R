@@ -77,8 +77,6 @@ seir <-function(n=5500000,ne=10,nt=150) {
 
 ## Plotting graphs for the initial model
 
-system.time(seir())
-
 exec <- seir()
 
 ## Normalizing the scales of infections of various cases onto a common scale
@@ -182,7 +180,7 @@ stripchart(datapeakstd, main="Cohort's Infection peak movement Vs \nStandardized
 
 datapeak <- list("Cautious 10%"=dd2, "Random sample" =dd3) ##list of standardized movements in infection peak for three cohorts
 
-stripchart(datapeak, main="Cohort's Infection peak movement Vs \nmove in population peak ", xlab="Movement in infection peak compared\n to infection peak movement in whole popn movement (days)", ylab="Cohort",method="jitter",col = c("brown","green", "cadetblue"),pch=16)
+stripchart(datapeak, main="Cohort's Infection peak movement Vs \nmove in population peak ", xlab="Move in infection peak from run to run compared\n to the infection peak movement in whole popn (days)", ylab="Cohort",method="jitter",col = c("brown","green", "cadetblue"),pch=16)
 
 
 ## Conclusion
