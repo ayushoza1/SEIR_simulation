@@ -113,13 +113,15 @@ text(maxxx, max(xx)-0.2, labels = maxxx, cex = 0.7) ; text(maxyy, max(yy)-0.2, l
 ## *************************
 ## Plotting graphs replicating 10 model simulations to represent the variability of the infections in each of the three cohorts. Trajectory
 ## of the pandemic is plotted for each sample run alongside a stripchart and boxplot. The boxplot shows the variabilty in pandemic peak for the 10 runs 
-## , however, it ignores the pairwsie variability or day on day changes in infection peaks. The stripchart shows the day on day variability by 
+## , however, it ignores the pairwsie variability or day on day changes in infection peaks. The first stripchart shows the day on day variability by 
 ## standardizing the infection peak movement from one sample run to the next to 10 days movement and showing the corresponding movement in the other 
-## cohorts peak.
+## cohorts peak. While the second stripshart shows the change in cohorts infection peak from run to run compared to the change in infection peak for the 
+## whole population.
 
 v1 <- v2 <- v3 <- rep(0, 10) ##initialize vector to store day of infection peak for each cohort for each sample run
 d1 <- d2 <- d3 <- rep(0,9) ##initialize vector to store the difference in the infection peak between each run
 sd1 <- sd2 <- sd3 <- rep(10,9) ##initialize vector to store the standardized difference in the infection peak between each run coressponding to 10 day movement for whole popn
+dd2 <- dd3 <- rep(0,9) ##initialize vector to store the  difference in the infection peak movement compared to the whole populations infection peak moveemnt 
 
 ## Looping over to run the model for 10 times with parallel normalization and finding maximum day at which infection peaks of each cohort
 
@@ -161,11 +163,13 @@ for (i in 1:9) {
   d2[i] <- v2[i+1] - v2[i] ## Storage of change in infection peak for cautious 10% of popn
   d3[i] <- v3[i+1] - v3[i] ## Storage of change in infection peak for sample 0.1% of popn
   
-  sd2[i] <- (d2[i]/d1[i])*10 ## Standardize change in infection peak for cautious 10% popn 
-  sd3[i] <- (d3[i]/d1[i])*10 ## Standardize change in infection peak for cautious 10% popn 
-
   }
 
+sd2 <- (d2/d1)*10 ##Standardize change in infection peak for cautious 10% popn 
+sd3 <- (d3/d1)*10 ##Standardize change in infection peak for random 0.1% of popn 
+
+dd2 <- d2 - d1 #Difference between move in infection people for whole population compared to cautious 10%
+dd3 <- d3 - d1 #Difference between move in infection people for whole population compared to random 0.1%
 
 ## Box plot representing the peak values for 10 runs for each of the 3 cases/cohorts
 
@@ -173,15 +177,21 @@ boxplot(v1, v2, v3, main = "Boxplot & Whistlers for the infection peak of 3 coho
 
 ## Stripchart representing the movement in infection peaks corresponding to a 10 day move in the infection peak of whole popn
 
-datapeak <- list("Whole population"=sd1, "Cautious 10%"=sd2, "Random sample" =sd3) ##list of standardized movements in infection peak for three cohorts
+datapeakstd <- list("Whole population"=sd1, "Cautious 10%"=sd2, "Random sample" =sd3) ##list of standardized movements in infection peak for three cohorts
 
-stripchart(datapeak, main="Cohort's Infection peak movement Vs \nStandardized 10 day move in population peak ", xlab="Movement in infection peak", ylab="Cohort",method="jitter",col = c("brown","green", "cadetblue"),pch=16)
+stripchart(datapeakstd, main="Cohort's Infection peak movement Vs \nStandardized 10 day move in population peak ", xlab="Movement in infection peak (days)", ylab="Cohort",method="jitter",col = c("brown","green", "cadetblue"),pch=16)
+
+## Stripchart representing the movement in infection peaks compared to the move in the infection peak of whole popn from sample run to sample run
+
+datapeak <- list("Cautious 10%"=dd2, "Random sample" =dd3) ##list of standardized movements in infection peak for three cohorts
+
+stripchart(datapeak, main="Cohort's Infection peak movement Vs \nmove in population peak ", xlab="Movement in infection peak compared\n to infection peak movement in whole popn movement (days)", ylab="Cohort",method="jitter",col = c("brown","green", "cadetblue"),pch=16)
 
 ## Conclusion
-## The graphs plotted show that infection trajectories simulated using the ZOE data app will have a later peak compared to similation of the whole popluation
-## given they are cautious (later peaks on line graphs). Infection trajectories using the ZOE app are likely to show lower variability from run to run regarding
-## the infection peak compared to the REACT-2 trajectories (given the cluster of points <10 days on the stripchart compared to the random sample). However, the 
-## ZOE app data's infection peak will still show variability of a factor 10/20% compared to a simulated model of the whole population.
+## The graphs plotted show that infection trajectories simulated using the ZOE data app will have a later peak compared to similation of the whole popluation iven they are cautious 
+## (later peaks on line graphs). Infection trajectories using the ZOE app are likely to show lower variability from run to run regarding the infection peak compared to the REACT-2
+## trajectories (given the cluster of points around 10 days for cautious 10% on the stripchart compared to the random sample). However, the ZOE app data's simulated movement in infection
+## peak will still show variability of +/-2/3 days compared to a simulated model of the whole population (last stripchart).
 
 
 
