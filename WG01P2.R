@@ -164,7 +164,7 @@ dd3 <- d3 - d1 # Difference between move in infection people for whole populatio
 
 ## Line chart representing the infection peak for each of the 10 sample runs
 
-plot(c(1:10), v1 , pch = 19, cex = 1, main = "Infection peak for sample runs", xlab = "Run Number", ylab = "Infection peak (Day)", type = 'o', col = 'brown', ylim = c(80,105))
+plot(c(1:10), v1 , pch = 19, cex = 1, main = "Infection peak for sample runs", xlab = "Run Number", ylab = "Infection peak (Day)", type = 'o', col = 'brown', ylim = c(80,115))
 lines(v2, col = 'green', pch = 19, type = 'o')
 lines(v3, col = 'cadetblue', pch = 19, type = 'o')
 legend("topleft", inset = 0.05, legend = c("Whole population", "Cautious 10% of the popultion", "Random sample of 5,500"), col = c("brown", "green", "cadetblue"), lty = 1:1, cex = 0.5)
@@ -191,6 +191,7 @@ stripchart(datapeak, main = "Cohort's Infection peak movement Vs \nmove in popul
 ## (later peaks on line graphs). Infection trajectories using the ZOE app are likely to show lower variability from run to run regarding the infection peak compared to the REACT-2
 ## trajectories (given the cluster of points around 10 days for cautious 10% on the strip chart compared to the random sample). However, the ZOE app data's simulated movement in infection
 ## peak will still show variability of +/-2/3 days compared to a simulated model of the whole population (last strip chart and line graph).
+
 
 
 
