@@ -109,7 +109,7 @@ legend("topleft", inset = 0.05, legend = c("Whole population", "Cautious 10% of 
 
 points(maxxx, max(xx), col = "brown", pch = 16) ; points(maxyy, max(yy), col = "green", pch = 16) ; points(maxzz, max(zz), col = "cadetblue", pch = 16)
 abline(v = c(maxxx, maxyy, maxzz) , lty=c(2, 2, 2), lwd=c(0.4, 0.4, 0.4), col=c("grey", "grey"))
-legend(3.1, 2.9, legend = c(maxxx, maxyy, maxzz), title = "Peak Day of Infection", col = c("brown", "green", "cadetblue"), lty = 1, pt.bg = c("brown", "green", "cadetblue"), x.intersp = 1.5, text.width =  7, pch = 21, cex = 0.7)
+legend(3.1, 2.6, legend = c(maxxx, maxyy, maxzz), title = "Peak Day of Infection", col = c("brown", "green", "cadetblue"), lty = 1, pt.bg = c("brown", "green", "cadetblue"), x.intersp = 1.5, text.width =  7, pch = 21, cex = 0.7)
 
 ## 10 sample runs - Overview
 ## *************************
